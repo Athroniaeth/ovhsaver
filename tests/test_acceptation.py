@@ -4,7 +4,7 @@ from typing import List
 import pytest
 import pytz
 
-from ovhsaver.__main__ import time_to_open
+from ovhsaver.cloud import time_to_open
 
 TIME_ZONE = pytz.timezone("Europe/Paris")
 TODAY = datetime.datetime.now(tz=TIME_ZONE)
