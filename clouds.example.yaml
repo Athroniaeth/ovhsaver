@@ -1,14 +1,21 @@
 clouds:
   ovhcloud:
-    auth_type: 'v3oidcclientcredentials'
-    region_name: GRA
+    # Instances Region
+    region_name: "GRA11"
+    interface: public
+    identity_api_version: 3
+
     auth:
-      protocol: 'openid'
-      access_token_type: 'id_token'
-      openid_scope: 'openid profile email publicCloudProject/all'
-      auth_url: 'https://auth.cloud.ovh.net/v3'
-      identity_provider: 'ovhcloud-emea'
-      discovery_endpoint: 'https://iam.ovh.net/role-adapter/urn:v1:eu:resource:publicCloudProject:pci/.well-known/openid-configuration'
-      project_id: '0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f'
-      client_id: '0f0f0f0f0f0f0f0f'
-      client_secret: 'xxxx'
+      # User credentials details
+      username: "user-XXXXXX"
+      user_id: "xxx111xxx111xxx"
+      project_name: "000000"
+      project_id: "xxx111xxx111xxx"
+      auth_url: "https://auth.cloud.ovh.net/"
+
+      # Get password on login page
+      password: "XXXxxx111XXXxxx111"  # ou laisser vide si vous le fournissez lors de l'exécution
+
+      # Default values
+      user_domain_name: "ovhcloud-emea"
+      project_domain_id: "default"

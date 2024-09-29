@@ -1,3 +1,5 @@
+import os
+
 from openstack import connection
 from openstack.config import loader
 
@@ -12,6 +14,6 @@ cloud_config = config.get_one_cloud(cloud='ovhcloud')
 # Initialize the OpenStack connection using the specified cloud configuration
 conn = connection.Connection(config=cloud_config)
 
-# List the available containers in the object store and print them
-for container in conn.object_store.containers():
-    print(container.to_dict())
+# List the available compute instances
+for server in conn.compute.servers():
+    print(server)
