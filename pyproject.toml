@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "ovhsaver"
+version = "0.1.0"
+description = ""
+authors = ["Athroniaeth <pierre.chaumont@hotmail.fr>"]
+readme = "README.md"
+packages = [
+    { include = "ovhsaver", from = "src" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
