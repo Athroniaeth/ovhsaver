@@ -18,6 +18,10 @@ pytz = "^2024.2"
 ruff = "^0.6.8"
 pytest = "^8.3.3"
 
+[tool.pytest.ini_options]
+pythonpath = "src"
+testpaths = "tests"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

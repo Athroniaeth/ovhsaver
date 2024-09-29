@@ -10,7 +10,7 @@ from openstack.compute.v2.server import Server
 from openstack.config import loader
 from openstack.connection import Connection
 
-from src.ovhsaver import CONFIG_PATH
+from ovhsaver import CONFIG_PATH
 
 
 def time_to_open(date: datetime) -> bool:
