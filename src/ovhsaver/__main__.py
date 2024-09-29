@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, tzinfo
 
 import pytz
 from openstack import connection
@@ -7,7 +7,7 @@ from openstack.config import loader
 from src.ovhsaver import CONFIG_PATH
 
 
-def is_online_time() -> bool:
+def is_online_time(date: datetime) -> bool:
     """
     Return if is online time or not
 
@@ -15,9 +15,8 @@ def is_online_time() -> bool:
         it's 'online' time if it's 8h00 - 19h00 (Paris TZ)
         it's offline time if it's 19h00 - 8h00 (Paris TZ)
     """
-    tz = pytz.timezone("Europe/Paris")
-    hour = datetime.now(tz=tz).hour
-    is_weekend = datetime.now().weekday() in [5, 6]  # Saturday or Sunday
+    hour = date.hour
+    is_weekend = date.weekday() in [5, 6]  # Saturday or Sunday
 
     conditions = (
         8 <= hour < 19,
@@ -30,6 +29,9 @@ def is_online_time() -> bool:
 
 
 if __name__ == "__main__":
+    TIME_ZONE = pytz.timezone("Europe/Paris")
+    TODAY = datetime.now(tz=TIME_ZONE)
+
     # Load OpenStack configuration from the specified clouds.yaml file
     config = loader.OpenStackConfig(config_files=[f'{CONFIG_PATH}'])
 
@@ -39,7 +41,7 @@ if __name__ == "__main__":
     # Initialize the OpenStack connection using the specified cloud configuration
     conn = connection.Connection(config=cloud_config)
 
-    time_is_online = is_online_time()
+    time_is_online = is_online_time(date=TODAY)
     print(f"{time_is_online=}\n")
 
     # List the available compute instances
