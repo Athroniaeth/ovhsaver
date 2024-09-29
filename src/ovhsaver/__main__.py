@@ -7,7 +7,7 @@ from openstack.config import loader
 from src.ovhsaver import CONFIG_PATH
 
 
-def is_online_time(date: datetime) -> bool:
+def time_to_open(date: datetime) -> bool:
     """
     Return if is online time or not
 
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     # Initialize the OpenStack connection using the specified cloud configuration
     conn = connection.Connection(config=cloud_config)
 
-    time_is_online = is_online_time(date=TODAY)
+    time_is_online = time_to_open(date=TODAY)
     print(f"{time_is_online=}\n")
 
     # List the available compute instances
