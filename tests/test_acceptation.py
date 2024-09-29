@@ -22,7 +22,8 @@ def generate_mapping_date(hour: int, minute: int, second: int, list_day: List[in
             hour=hour,
             minute=minute,
             second=second,
-        ) for day in list_day
+        )
+        for day in list_day
     ]
 
 

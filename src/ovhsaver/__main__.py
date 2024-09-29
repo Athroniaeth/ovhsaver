@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from os import PathLike
 from pathlib import Path
@@ -19,24 +20,19 @@ def time_to_open(date: datetime) -> bool:
     Notes:
         it's 'online' time if it's 8h00 - 19h00 (Paris TZ)
         it's offline time if it's 19h00 - 8h00 (Paris TZ)
+
     """
     hour = date.hour
     is_weekend = date.weekday() in [5, 6]  # Saturday or Sunday
 
-    conditions = (
-        8 <= hour < 19,
-        not is_weekend
-    )
+    conditions = (8 <= hour < 19, not is_weekend)
 
     result = all(conditions)
-    print(f"{hour=} ; {is_weekend=}")
+    logging.info(f"{hour=} ; {is_weekend=}")
     return result
 
 
-def get_conn_openstack(
-        cloud_name: str = 'ovhcloud',
-        config_path: Union[str, PathLike] = None
-) -> Connection:
+def get_conn_openstack(cloud_name: str = "ovhcloud", config_path: Union[str, PathLike] = None) -> Connection:
     """
     Get connection to OpenStack cloud
 
@@ -46,6 +42,7 @@ def get_conn_openstack(
 
     Returns:
         Connection: Connection to OpenStack cloud
+
     """
     # Parse config path if given
     if config_path is not None:
@@ -75,23 +72,24 @@ def handle_server(server: Server, conn: Connection):
     Args:
         server (Server): Server to handle
         conn (Connection): Connection to OpenStack cloud
+
     """
     server = conn.compute.get_server(server.id)
-    server_is_online = (server.status == 'ACTIVE')
-    print(f"Server '{server.name}' is {"'online'" if server_is_online else "'offline'"}")
+    server_is_online = server.status == "ACTIVE"
+    logging.info(f"Server '{server.name}' is {"'online'" if server_is_online else "'offline'"}")
 
     if time_is_online and not server_is_online:
-        print(f'\tStarting server {server.name}...\n')
+        logging.info(f"\tStarting server {server.name}...\n")
         conn.compute.start_server(server.id)
-        conn.compute.wait_for_server(server, status='ACTIVE', failures=['ERROR'], interval=60, wait=360)
+        conn.compute.wait_for_server(server, status="ACTIVE", failures=["ERROR"], interval=60, wait=360)
 
     elif not time_is_online and server_is_online:
-        print(f'\tStopping server {server.name}...\n')
+        logging.info(f"\tStopping server {server.name}...\n")
         conn.compute.stop_server(server)
-        conn.compute.wait_for_server(server, status='SHUTOFF', failures=['ERROR'], interval=60, wait=360)
+        conn.compute.wait_for_server(server, status="SHUTOFF", failures=["ERROR"], interval=60, wait=360)
 
     else:
-        print("Nothing to do\n")
+        logging.info("Nothing to do\n")
 
 
 if __name__ == "__main__":
@@ -101,7 +99,7 @@ if __name__ == "__main__":
     conn = get_conn_openstack(config_path=CONFIG_PATH)
 
     time_is_online = time_to_open(date=TODAY)
-    print(f"{time_is_online=}\n")
+    logging.info(f"{time_is_online=}\n")
 
     # List the available compute instances
     for server in conn.compute.servers():

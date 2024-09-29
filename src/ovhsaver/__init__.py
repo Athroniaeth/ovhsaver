@@ -4,4 +4,4 @@ from pathlib import Path
 SRC_PATH = Path(__file__).parents[2]
 
 # Custom project paths
-CONFIG_PATH = SRC_PATH / 'clouds.yaml'
+CONFIG_PATH = SRC_PATH / "clouds.yaml"
