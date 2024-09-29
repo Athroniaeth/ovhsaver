@@ -11,6 +11,7 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.12"
 openstacksdk = "^4.0.0"
+pytz = "^2024.2"
 
 
 [tool.poetry.group.dev.dependencies]
