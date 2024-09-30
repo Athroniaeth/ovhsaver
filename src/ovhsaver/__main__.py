@@ -1,9 +1,15 @@
+import sys
 from datetime import datetime
+from pathlib import Path
 
 import pytz
 
-from ovhsaver import CONFIG_PATH
-from ovhsaver.cloud import get_conn_openstack, handle_server
+# Automatically add PYTHONPATH to the sys.path
+SRC_FOLDER = Path(__file__).parents[1]
+sys.path.append(f"{SRC_FOLDER}")
+
+from ovhsaver import CONFIG_PATH  # noqa: E402
+from ovhsaver.cloud import get_conn_openstack, handle_server  # noqa: E402
 
 
 if __name__ == "__main__":
