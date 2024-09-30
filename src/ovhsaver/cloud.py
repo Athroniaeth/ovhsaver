@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from os import PathLike
 from pathlib import Path
-from typing import Union, Literal, List
+from typing import Union, Literal
 
 from openstack import connection
 from openstack.compute.v2.server import Server
@@ -63,10 +63,10 @@ def get_conn_openstack(cloud_name: str = "ovhcloud", config_path: Union[str, Pat
 
 
 def handle_server(
-        server: Server,
-        conn: Connection,
-        today: datetime,
-) -> Literal["STARTED", "SUSPENDED", "NOTHING"]:
+    server: Server,
+    conn: Connection,
+    today: datetime,
+) -> Literal["STARTED", "SHELVED", "NOTHING"]:
     """
     Handle the server to start or suspend it
 
@@ -82,17 +82,16 @@ def handle_server(
 
     if must_open and not server_is_online:
         logging.info(f"Server '{server.name}' : Starting server '{server.name}'...\n")
-        conn.compute.start_server(server.id)
+        conn.compute.unshelve_server(server.id)
         conn.compute.wait_for_server(server, status="ACTIVE", failures=["ERROR"], interval=1, wait=360)
         return "STARTED"
 
     elif not must_open and server_is_online:
         logging.info(f"Server '{server.name}' : Suspending server '{server.name}'...\n")
-        conn.compute.suspend_server(server)
-        conn.compute.wait_for_server(server, status="SUSPENDED", failures=["ERROR"], interval=1, wait=360)
-        return "SUSPENDED"
+        conn.compute.shelve_server(server)
+        conn.compute.wait_for_server(server, status="SHELVED", failures=["ERROR"], interval=1, wait=360)
+        return "SHELVED"
 
     else:
         logging.info("Nothing to do\n")
         return "NOTHING"
-

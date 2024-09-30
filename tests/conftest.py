@@ -20,6 +20,18 @@ class FakeCompute:
         """Start a fake server"""
         ...
 
+    def stop_server(self, id: int):
+        """Stop a fake server"""
+        ...
+
+    def shelve_server(self, id: int):
+        """Shelve a fake server"""
+        ...
+
+    def unshelve_server(self, id: int):
+        """Unshelve a fake server"""
+        ...
+
     def suspend_server(self, server: FakeServer):
         """Stop a fake server"""
         ...

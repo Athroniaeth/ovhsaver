@@ -50,6 +50,7 @@ GENERATOR_MORNING_WEEKEND = generate_mapping_date(hour=8, minute=0, second=0, li
 
 GENERATOR_EVENING_WEEKEND = generate_mapping_date(hour=19, minute=0, second=0, list_day=LIST_WEEKEND)
 
+
 @pytest.mark.parametrize(
     ["list_date", "expected", "message"],
     [
@@ -76,14 +77,14 @@ def test_time_to_open_weekend(list_date: List[datetime.datetime]):
 @pytest.mark.parametrize(
     ("list_date", "status", "expected"),
     [
-        (GENERATOR_MORNING, "SUSPENDED", "STARTED"),
+        (GENERATOR_MORNING, "SHELVED", "STARTED"),
         (GENERATOR_MORNING, "ACTIVE", "NOTHING"),
-        (GENERATOR_EVENING, "SUSPENDED", "STARTED"),
+        (GENERATOR_EVENING, "SHELVED", "STARTED"),
         (GENERATOR_EVENING, "ACTIVE", "NOTHING"),
-        (GENERATOR_TOO_EARLY, "SUSPENDED", "NOTHING"),
-        (GENERATOR_TOO_EARLY, "ACTIVE", "SUSPENDED"),
-        (GENERATOR_TOO_LATE, "SUSPENDED", "NOTHING"),
-        (GENERATOR_TOO_LATE, "ACTIVE", "SUSPENDED"),
+        (GENERATOR_TOO_EARLY, "SHELVED", "NOTHING"),
+        (GENERATOR_TOO_EARLY, "ACTIVE", "SHELVED"),
+        (GENERATOR_TOO_LATE, "SHELVED", "NOTHING"),
+        (GENERATOR_TOO_LATE, "ACTIVE", "SHELVED"),
     ],
 )
 def test_handler_server(list_date: List[datetime.datetime], status: str, expected: str):
