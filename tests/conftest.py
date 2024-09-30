@@ -13,15 +13,19 @@ class FakeCompute:
         self.status = status
 
     def get_server(self, id: int):
+        """Return a fake server"""
         return FakeServer(id=id, status=self.status)
 
     def start_server(self, id: int):
+        """Start a fake server"""
         ...
 
     def stop_server(self, server: FakeServer):
+        """Stop a fake server"""
         ...
 
     def wait_for_server(self, server: FakeServer, status="ACTIVE", failures=["ERROR"], interval=60, wait=360):
+        """Wait for a fake server to be in a specific status"""
         ...
 
 

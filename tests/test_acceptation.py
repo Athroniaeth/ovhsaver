@@ -37,44 +37,28 @@ GENERATOR_TOO_EARLY = generate_mapping_date(hour=7, minute=59, second=59, list_d
 GENERATOR_TOO_LATE = generate_mapping_date(hour=19, minute=0, second=0, list_day=LIST_WEEKDAY)
 
 
-@pytest.mark.parametrize("date", GENERATOR_MORNING)
-def test_time_to_open_morning(date: datetime.datetime):
+@pytest.mark.parametrize(
+    ["list_date", "expected", "message"],
+    [
+        (GENERATOR_MORNING, True, "Should be online time (it's morning, after opening)"),
+        (GENERATOR_EVENING, True, "Should be online time (it's evening, before closing)"),
+        (GENERATOR_TOO_EARLY, False, "Should be offline time (it's too early to open)"),
+        (GENERATOR_TOO_LATE, False, "Should be offline time (it's too late to stay open)"),
+    ],
+)
+def test_time_to_open(list_date: List[datetime.datetime], expected: bool, message: str):
     """Test if time_to_open return True when it's morning"""
-    assert time_to_open(date=date), "Should be online time (it's morning, after opening)"
+    for date in list_date:
+        assert time_to_open(date=date) == expected, message
 
 
-@pytest.mark.parametrize("date", GENERATOR_EVENING)
-def test_time_to_open_evening(date: datetime.datetime):
-    """Test if time_to_open return True when it's evening"""
-    assert time_to_open(date=date), "Should be online time (it's evening, before closing)"
-
-
-@pytest.mark.parametrize("date", GENERATOR_TOO_EARLY)
-def test_time_to_open_too_early(date: datetime.datetime):
-    """Test if time_to_open return False when it's too early"""
-    assert not time_to_open(date=date), "Should be offline time (it's too early to open)"
-
-
-@pytest.mark.parametrize("date", GENERATOR_TOO_LATE)
-def test_time_to_open_too_late(date: datetime.datetime):
-    """Test if time_to_open return False when it's too late"""
-    assert not time_to_open(date=date), "Should be offline time (it's too late to stay open)"
-
-
-@pytest.mark.parametrize("date", GENERATOR_MORNING)
-def test_time_to_open_morning_weekend(date: datetime.datetime):
+@pytest.mark.parametrize("list_date", [GENERATOR_MORNING, GENERATOR_EVENING])
+def test_time_to_open_weekend(list_date: List[datetime.datetime]):
     """Test if time_to_open return False the morning when it's weekend"""
     # Update day to Saturday, the next to Sunday
-    assert not time_to_open(date=date.replace(day=7)), "Should be offline time (it's weekend)"
-    assert not time_to_open(date=date.replace(day=1)), "Should be offline time (it's weekend)"
-
-
-@pytest.mark.parametrize("date", GENERATOR_EVENING)
-def test_time_to_open_evening_weekend(date: datetime.datetime):
-    """Test if time_to_open return False the evening when it's weekend"""
-    # Update day to Saturday, the next to Sunday
-    assert not time_to_open(date=date.replace(day=7)), "Should be offline time (it's weekend)"
-    assert not time_to_open(date=date.replace(day=1)), "Should be offline time (it's weekend)"
+    for date in list_date:
+        assert not time_to_open(date=date.replace(day=7)), "Should be online time (it's weekend)"
+        assert not time_to_open(date=date.replace(day=1)), "Should be online time (it's weekend)"
 
 
 @pytest.mark.parametrize(
@@ -82,19 +66,15 @@ def test_time_to_open_evening_weekend(date: datetime.datetime):
     [
         (GENERATOR_MORNING, "SHUTOFF", "STARTED"),
         (GENERATOR_MORNING, "ACTIVE", "NOTHING"),
-
         (GENERATOR_EVENING, "SHUTOFF", "STARTED"),
         (GENERATOR_EVENING, "ACTIVE", "NOTHING"),
-
         (GENERATOR_TOO_EARLY, "SHUTOFF", "NOTHING"),
         (GENERATOR_TOO_EARLY, "ACTIVE", "STOPPED"),
-
         (GENERATOR_TOO_LATE, "SHUTOFF", "NOTHING"),
         (GENERATOR_TOO_LATE, "ACTIVE", "STOPPED"),
-
-    ]
+    ],
 )
-def test_handler_server_morning(list_date: List[datetime.datetime], status: str, expected: str):
+def test_handler_server(list_date: List[datetime.datetime], status: str, expected: str):
     """Test if time_to_open return False the morning when it's weekend"""
     conn = FakeConnection()
     server = FakeServer(id=1, status=status)
