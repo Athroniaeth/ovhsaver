@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from os import PathLike
 from pathlib import Path
-from typing import Union, Literal
+from typing import Union, Literal, List
 
 from openstack import connection
 from openstack.compute.v2.server import Server
@@ -25,7 +25,7 @@ def time_to_open(date: datetime) -> bool:
     conditions = (8 <= hour < 19, not is_weekend)
 
     result = all(conditions)
-    logging.info(f"{hour=} ; {is_weekend=}")
+    logging.info(f"Time Open : {hour=} ; {is_weekend=}")
     return result
 
 
@@ -62,7 +62,11 @@ def get_conn_openstack(cloud_name: str = "ovhcloud", config_path: Union[str, Pat
     return conn
 
 
-def handle_server(server: Server, conn: Connection, today: datetime) -> Literal["STARTED", "STOPPED", "NOTHING"]:
+def handle_server(
+        server: Server,
+        conn: Connection,
+        today: datetime,
+) -> Literal["STARTED", "STOPPED", "NOTHING"]:
     """
     Handle the server to start or stop it
 
@@ -74,16 +78,16 @@ def handle_server(server: Server, conn: Connection, today: datetime) -> Literal[
     """
     must_open = time_to_open(date=today)
     server_is_online = server.status == "ACTIVE"
-    logging.info(f"Server '{server.name}' is {"'online'" if server_is_online else "'offline'"}")
+    logging.info(f"Server '{server.name}' : {server.status}")
 
     if must_open and not server_is_online:
-        logging.info(f"\tStarting server {server.name}...\n")
+        logging.info(f"Server '{server.name}' : Starting server '{server.name}'...\n")
         conn.compute.start_server(server.id)
         conn.compute.wait_for_server(server, status="ACTIVE", failures=["ERROR"], interval=60, wait=360)
         return "STARTED"
 
     elif not must_open and server_is_online:
-        logging.info(f"\tStopping server {server.name}...\n")
+        logging.info(f"Server '{server.name}' : Stopping server '{server.name}'...\n")
         conn.compute.stop_server(server)
         conn.compute.wait_for_server(server, status="SHUTOFF", failures=["ERROR"], interval=60, wait=360)
         return "STOPPED"

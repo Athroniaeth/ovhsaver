@@ -14,7 +14,7 @@ clouds:
       auth_url: "https://auth.cloud.ovh.net/"
 
       # Get password on login page
-      password: "XXXxxx111XXXxxx111"  # ou laisser vide si vous le fournissez lors de l'exécution
+      password: "XXXxxx111XXXxxx111"
 
       # Default values
       user_domain_name: "ovhcloud-emea"
