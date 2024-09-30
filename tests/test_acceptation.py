@@ -10,22 +10,32 @@ from ovhsaver.cloud import time_to_open, handle_server
 TIME_ZONE = pytz.timezone("Europe/Paris")
 TODAY = datetime.datetime.now(tz=TIME_ZONE)
 
-LIST_WEEKDAY = [2, 3, 4, 5, 6]  # Monday to Friday
-LIST_WEEKEND = [1, 7]  # Saturday or Sunday
+LIST_WEEKDAY = [0, 1, 2, 3, 4]  # Monday to Friday
+LIST_WEEKEND = [5, 6]  # Saturday or Sunday
 
 
 def generate_mapping_date(hour: int, minute: int, second: int, list_day: List[int]) -> List[datetime.datetime]:
-    return [
-        datetime.datetime(
-            year=TODAY.year,
-            month=TODAY.month,
-            day=day,
-            hour=hour,
-            minute=minute,
-            second=second,
+    result = []
+    for day in list_day:
+        if not (0 <= day <= 6):
+            raise ValueError(f"List of day must contains id_weekday between 0-6 {list_day}")
+
+        # Calculate the offset in days to get the next corresponding day.
+        delta_days = (day - TODAY.weekday() + 7) % 7
+        next_weekday = TODAY + datetime.timedelta(days=delta_days)
+
+        # Generate date with specified hours, minutes and seconds
+        result.append(
+            datetime.datetime(
+                year=next_weekday.year,
+                month=next_weekday.month,
+                day=next_weekday.day,
+                hour=hour,
+                minute=minute,
+                second=second,
+            )
         )
-        for day in list_day
-    ]
+    return result
 
 
 GENERATOR_MORNING = generate_mapping_date(hour=8, minute=0, second=0, list_day=LIST_WEEKDAY)
@@ -36,6 +46,9 @@ GENERATOR_TOO_EARLY = generate_mapping_date(hour=7, minute=59, second=59, list_d
 
 GENERATOR_TOO_LATE = generate_mapping_date(hour=19, minute=0, second=0, list_day=LIST_WEEKDAY)
 
+GENERATOR_MORNING_WEEKEND = generate_mapping_date(hour=8, minute=0, second=0, list_day=LIST_WEEKEND)
+
+GENERATOR_EVENING_WEEKEND = generate_mapping_date(hour=19, minute=0, second=0, list_day=LIST_WEEKEND)
 
 @pytest.mark.parametrize(
     ["list_date", "expected", "message"],
@@ -52,26 +65,25 @@ def test_time_to_open(list_date: List[datetime.datetime], expected: bool, messag
         assert time_to_open(date=date) == expected, message
 
 
-@pytest.mark.parametrize("list_date", [GENERATOR_MORNING, GENERATOR_EVENING])
+@pytest.mark.parametrize("list_date", [GENERATOR_MORNING_WEEKEND, GENERATOR_EVENING_WEEKEND])
 def test_time_to_open_weekend(list_date: List[datetime.datetime]):
     """Test if time_to_open return False the morning when it's weekend"""
     # Update day to Saturday, the next to Sunday
     for date in list_date:
-        assert not time_to_open(date=date.replace(day=7)), "Should be online time (it's weekend)"
-        assert not time_to_open(date=date.replace(day=1)), "Should be online time (it's weekend)"
+        assert not time_to_open(date=date), "Should be online time (it's weekend)"
 
 
 @pytest.mark.parametrize(
     ("list_date", "status", "expected"),
     [
-        (GENERATOR_MORNING, "SHUTOFF", "STARTED"),
+        (GENERATOR_MORNING, "SUSPENDED", "STARTED"),
         (GENERATOR_MORNING, "ACTIVE", "NOTHING"),
-        (GENERATOR_EVENING, "SHUTOFF", "STARTED"),
+        (GENERATOR_EVENING, "SUSPENDED", "STARTED"),
         (GENERATOR_EVENING, "ACTIVE", "NOTHING"),
-        (GENERATOR_TOO_EARLY, "SHUTOFF", "NOTHING"),
-        (GENERATOR_TOO_EARLY, "ACTIVE", "STOPPED"),
-        (GENERATOR_TOO_LATE, "SHUTOFF", "NOTHING"),
-        (GENERATOR_TOO_LATE, "ACTIVE", "STOPPED"),
+        (GENERATOR_TOO_EARLY, "SUSPENDED", "NOTHING"),
+        (GENERATOR_TOO_EARLY, "ACTIVE", "SUSPENDED"),
+        (GENERATOR_TOO_LATE, "SUSPENDED", "NOTHING"),
+        (GENERATOR_TOO_LATE, "ACTIVE", "SUSPENDED"),
     ],
 )
 def test_handler_server(list_date: List[datetime.datetime], status: str, expected: str):

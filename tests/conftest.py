@@ -20,7 +20,7 @@ class FakeCompute:
         """Start a fake server"""
         ...
 
-    def stop_server(self, server: FakeServer):
+    def suspend_server(self, server: FakeServer):
         """Stop a fake server"""
         ...
 
