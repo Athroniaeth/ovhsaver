@@ -9,18 +9,19 @@ on:
     branches:
       - main
   schedule:
-    - cron: "0 8,19 * * *"  # Start the job at 8h00 and 19h00
+    - cron: "0 8,19 * * *"  # Start the job at 8h00 and 19h00 (weekday)
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Checkout code
+      # Step 1 : Checkout du code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2 : Connect to OVH Instance via SSH
-      - name: Connect to OVH Instance via SSH
+      # Step 2 : Git pull sur OVH lors des push et merges
+      - name: Git pull on OVH instance
+        if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action == 'closed') }}
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOST }}
@@ -30,6 +31,18 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
             cd /home/${{ secrets.USERNAME }}/ovhsaver
-            sudo docker compose down
             git pull origin main
+
+      # Step 3 : Docker compose up (scheduler)
+      - name: Git pull and Docker compose up on schedule
+        if: ${{ github.event_name == 'schedule' }}
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+          script: |
+            cd /home/${{ secrets.USERNAME }}/ovhsaver
             sudo docker compose up -d --build
