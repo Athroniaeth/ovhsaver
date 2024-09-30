@@ -18,7 +18,7 @@ def main(zone: str = "Europe/Paris", black_list: List[str] = None):
 
     """
     if black_list is None:
-        black_list = ["ovhcloud"]
+        black_list = ["ovhsaver"]
 
     tz = pytz.timezone(zone)
     today = datetime.now(tz=tz)
@@ -28,6 +28,6 @@ def main(zone: str = "Europe/Paris", black_list: List[str] = None):
     # Handle all servers in the cloud
     for server in conn.compute.servers():
         if server.name in black_list:
-            logging.info(f"Skip server '{server.name}' (blacklisted)")
+            logging.info(f"Skip server '{server.name}' (blacklisted)\n")
             continue
         handle_server(server, conn, today=today)

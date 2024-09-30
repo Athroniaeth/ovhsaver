@@ -1,0 +1,35 @@
+name: Deploy to OVH via SSH
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+  schedule:
+    - cron: "0 8,19 * * *"  # Start the job at 8h00 and 19h00
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2 : Connect to OVH Instance via SSH
+      - name: Connect to OVH Instance via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+          script: |
+            cd /home/${{ secrets.USERNAME }}/ovhsaver
+            sudo docker compose down
+            git pull origin main
+            sudo docker compose up -d --build
