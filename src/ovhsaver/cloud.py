@@ -2,14 +2,12 @@ import logging
 from datetime import datetime
 from os import PathLike
 from pathlib import Path
-from typing import Union
+from typing import Union, Literal
 
 from openstack import connection
 from openstack.compute.v2.server import Server
 from openstack.config import loader
 from openstack.connection import Connection
-
-from ovhsaver.__main__ import time_is_online
 
 
 def time_to_open(date: datetime) -> bool:
@@ -64,28 +62,32 @@ def get_conn_openstack(cloud_name: str = "ovhcloud", config_path: Union[str, Pat
     return conn
 
 
-def handle_server(server: Server, conn: Connection):
+def handle_server(server: Server, conn: Connection, today: datetime) -> Literal["STARTED", "STOPPED", "NOTHING"]:
     """
     Handle the server to start or stop it
 
     Args:
         server (Server): Server to handle
         conn (Connection): Connection to OpenStack cloud
+        today (datetime): Current date and time of the server
 
     """
-    server = conn.compute.get_server(server.id)
+    must_open = time_to_open(date=today)
     server_is_online = server.status == "ACTIVE"
     logging.info(f"Server '{server.name}' is {"'online'" if server_is_online else "'offline'"}")
 
-    if time_is_online and not server_is_online:
+    if must_open and not server_is_online:
         logging.info(f"\tStarting server {server.name}...\n")
         conn.compute.start_server(server.id)
         conn.compute.wait_for_server(server, status="ACTIVE", failures=["ERROR"], interval=60, wait=360)
+        return "STARTED"
 
-    elif not time_is_online and server_is_online:
+    elif not must_open and server_is_online:
         logging.info(f"\tStopping server {server.name}...\n")
         conn.compute.stop_server(server)
         conn.compute.wait_for_server(server, status="SHUTOFF", failures=["ERROR"], interval=60, wait=360)
+        return "STOPPED"
 
     else:
         logging.info("Nothing to do\n")
+        return "NOTHING"

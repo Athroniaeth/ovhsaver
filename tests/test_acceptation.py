@@ -4,7 +4,8 @@ from typing import List
 import pytest
 import pytz
 
-from ovhsaver.cloud import time_to_open
+from conftest import FakeServer, FakeConnection
+from ovhsaver.cloud import time_to_open, handle_server
 
 TIME_ZONE = pytz.timezone("Europe/Paris")
 TODAY = datetime.datetime.now(tz=TIME_ZONE)
@@ -74,3 +75,30 @@ def test_time_to_open_evening_weekend(date: datetime.datetime):
     # Update day to Saturday, the next to Sunday
     assert not time_to_open(date=date.replace(day=7)), "Should be offline time (it's weekend)"
     assert not time_to_open(date=date.replace(day=1)), "Should be offline time (it's weekend)"
+
+
+@pytest.mark.parametrize(
+    ("list_date", "status", "expected"),
+    [
+        (GENERATOR_MORNING, "SHUTOFF", "STARTED"),
+        (GENERATOR_MORNING, "ACTIVE", "NOTHING"),
+
+        (GENERATOR_EVENING, "SHUTOFF", "STARTED"),
+        (GENERATOR_EVENING, "ACTIVE", "NOTHING"),
+
+        (GENERATOR_TOO_EARLY, "SHUTOFF", "NOTHING"),
+        (GENERATOR_TOO_EARLY, "ACTIVE", "STOPPED"),
+
+        (GENERATOR_TOO_LATE, "SHUTOFF", "NOTHING"),
+        (GENERATOR_TOO_LATE, "ACTIVE", "STOPPED"),
+
+    ]
+)
+def test_handler_server_morning(list_date: List[datetime.datetime], status: str, expected: str):
+    """Test if time_to_open return False the morning when it's weekend"""
+    conn = FakeConnection()
+    server = FakeServer(id=1, status=status)
+
+    for date in list_date:
+        result = handle_server(server=server, conn=conn, today=date)  # noqa
+        assert result == expected, f"Should have '{expected}' the server"
