@@ -66,9 +66,9 @@ def handle_server(
         server: Server,
         conn: Connection,
         today: datetime,
-) -> Literal["STARTED", "STOPPED", "NOTHING"]:
+) -> Literal["STARTED", "SUSPENDED", "NOTHING"]:
     """
-    Handle the server to start or stop it
+    Handle the server to start or suspend it
 
     Args:
         server (Server): Server to handle
@@ -87,11 +87,12 @@ def handle_server(
         return "STARTED"
 
     elif not must_open and server_is_online:
-        logging.info(f"Server '{server.name}' : Stopping server '{server.name}'...\n")
-        conn.compute.stop_server(server)
-        conn.compute.wait_for_server(server, status="SHUTOFF", failures=["ERROR"], interval=60, wait=360)
-        return "STOPPED"
+        logging.info(f"Server '{server.name}' : Suspending server '{server.name}'...\n")
+        conn.compute.suspend_server(server)
+        conn.compute.wait_for_server(server, status="SUSPENDED", failures=["ERROR"], interval=60, wait=360)
+        return "SUSPENDED"
 
     else:
         logging.info("Nothing to do\n")
         return "NOTHING"
+
