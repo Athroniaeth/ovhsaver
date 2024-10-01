@@ -1,13 +1,8 @@
-name: Deploy to OVH via SSH
+name: Restart OVH instance on schedule
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    types: [closed]
-    branches:
-      - main
+  schedule:
+    - cron: "0 8,19 * * *"  # Start the job at 8h00 and 19h00 (UTC), Monday to Friday
 
 jobs:
   deploy:
@@ -17,9 +12,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2 : Git pull sur OVH lors des push et merges
-      - name: Git pull on OVH instance
-        if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action == 'closed') }}
+      # Step 2 : Git pull et Docker compose up sur planification
+      - name: Git pull and Docker compose up on schedule
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOST }}
@@ -29,4 +23,4 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
             cd /home/${{ secrets.USERNAME }}/ovhsaver
-            git pull origin main
+            sudo docker compose up -d --build

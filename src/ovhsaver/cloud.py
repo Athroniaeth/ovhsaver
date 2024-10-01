@@ -83,13 +83,13 @@ def handle_server(
     if must_open and not server_is_online:
         logging.info(f"Server '{server.name}' : Starting server '{server.name}'...\n")
         conn.compute.unshelve_server(server.id)
-        conn.compute.wait_for_server(server, status="ACTIVE", failures=["ERROR"], interval=1, wait=360)
+        # conn.compute.wait_for_server(server, status="ACTIVE", failures=["ERROR"], interval=1, wait=360)
         return "STARTED"
 
     elif not must_open and server_is_online:
         logging.info(f"Server '{server.name}' : Suspending server '{server.name}'...\n")
         conn.compute.shelve_server(server)
-        conn.compute.wait_for_server(server, status="SHELVED", failures=["ERROR"], interval=1, wait=360)
+        # conn.compute.wait_for_server(server, status="SHELVED", failures=["ERROR"], interval=1, wait=360)
         return "SHELVED"
 
     else:
