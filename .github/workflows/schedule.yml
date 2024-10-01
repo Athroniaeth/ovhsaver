@@ -2,7 +2,8 @@ name: Restart OVH instance on schedule
 
 on:
   schedule:
-    - cron: "0 8,19 * * *"  # Start the job at 8h00 and 19h00 (UTC), Monday to Friday
+    # Start the job at 8h00 and 19h00 (UTC+2), Monday to Friday.
+    - cron: "0 6,17 * * 1-5"
 
 jobs:
   deploy:
@@ -23,4 +24,4 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
             cd /home/${{ secrets.USERNAME }}/ovhsaver
-            sudo docker compose up -d --build
+            sudo docker compose up --build

@@ -18,7 +18,7 @@ def main(zone: str = "Europe/Paris", black_list: List[str] = None):
 
     """
     if black_list is None:
-        black_list = ["ovhsaver"]
+        black_list = ["ovhsaver", "pipeforms"]
 
     tz = pytz.timezone(zone)
     today = datetime.now(tz=tz)
