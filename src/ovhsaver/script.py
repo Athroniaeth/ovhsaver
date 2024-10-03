@@ -27,7 +27,14 @@ def main(zone: str = "Europe/Paris", black_list: List[str] = None):
 
     # Handle all servers in the cloud
     for server in conn.compute.servers():
-        if server.name in black_list:
+        # L4 is GPU server, we don't want to touch it
+        # Also, we don't want to touch the servers in the black list
+        condition = (
+            not server.name.startswith("l4"),
+            not (server.name in black_list)
+        )
+
+        if all(condition):
             logging.info(f"Skip server '{server.name}' (blacklisted)\n")
             continue
         handle_server(server, conn, today=today)
