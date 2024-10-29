@@ -9,6 +9,8 @@ from openstack.compute.v2.server import Server
 from openstack.config import loader
 from openstack.connection import Connection
 
+from ovhsaver import logger
+
 
 def time_to_open(date: datetime) -> bool:
     """
@@ -25,7 +27,7 @@ def time_to_open(date: datetime) -> bool:
     conditions = (8 <= hour < 19, not is_weekend)
 
     result = all(conditions)
-    logging.info(f"Time Open : {hour=} ; {is_weekend=}")
+    logger.info(f"Time Open : {date:%H:%M:%S} - {result}\n")
     return result
 
 
@@ -78,20 +80,20 @@ def handle_server(
     """
     must_open = time_to_open(date=today)
     server_is_online = server.status == "ACTIVE"
-    logging.info(f"Server '{server.name}' : {server.status}")
+    logger.info(f"Server '{server.name}' : {server.status}")
 
     if must_open and not server_is_online:
-        logging.info(f"Server '{server.name}' : Starting server '{server.name}'...\n")
+        logger.info(f"Server '{server.name}' : Starting server '{server.name}'...\n")
         conn.compute.unshelve_server(server.id)
         # conn.compute.wait_for_server(server, status="ACTIVE", failures=["ERROR"], interval=1, wait=360)
         return "STARTED"
 
     elif not must_open and server_is_online:
-        logging.info(f"Server '{server.name}' : Suspending server '{server.name}'...\n")
+        logger.info(f"Server '{server.name}' : Suspending server '{server.name}'...\n")
         conn.compute.shelve_server(server)
         # conn.compute.wait_for_server(server, status="SHELVED", failures=["ERROR"], interval=1, wait=360)
         return "SHELVED"
 
     else:
-        logging.info("Nothing to do\n")
+        logger.info("Nothing to do\n")
         return "NOTHING"

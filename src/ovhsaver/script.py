@@ -1,10 +1,9 @@
-import logging
 from datetime import datetime
 from typing import List
 
 import pytz
 
-from ovhsaver import CONFIG_PATH
+from ovhsaver import CONFIG_PATH, logger
 from ovhsaver.cloud import get_conn_openstack, handle_server
 
 
@@ -22,7 +21,6 @@ def main(zone: str = "Europe/Paris", black_list: List[str] = None):
 
     tz = pytz.timezone(zone)
     today = datetime.now(tz=tz)
-
     conn = get_conn_openstack(config_path=CONFIG_PATH)
 
     # Handle all servers in the cloud
@@ -35,7 +33,7 @@ def main(zone: str = "Europe/Paris", black_list: List[str] = None):
         )
 
         if any(condition):
-            logging.info(f"Skip server '{server.name}' (blacklisted)\n")
+            logger.info(f"Skip server '{server.name}' (blacklisted)\n")
             continue
 
         handle_server(server, conn, today=today)
