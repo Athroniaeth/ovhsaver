@@ -2,8 +2,8 @@ name: Restart OVH instance on schedule
 
 on:
   schedule:
-    # Start the job at 8h00 and 19h00 (UTC+2), Monday to Friday.
-    - cron: "0 6,17 * * 1-5"
+    # Start the job at 8h00 and 19h00 (UTC+1), Monday to Friday.
+    - cron: "0 7,18 * * 1-5"
 
 jobs:
   deploy:
