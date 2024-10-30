@@ -8,6 +8,6 @@ SRC_PATH = Path(__file__).parents[2]
 CONFIG_PATH = SRC_PATH / "clouds.yaml"
 
 # Logger configuration
-logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("ovhsaver")
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
