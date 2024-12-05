@@ -24,4 +24,4 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
             cd /home/${{ secrets.USERNAME }}/ovhsaver
-            sudo docker compose up --build
+            sudo docker compose up
